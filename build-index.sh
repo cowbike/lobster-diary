@@ -4,7 +4,7 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 OUT="$DIR/index.html"
 
 # Collect all diary files sorted by date
-FILES=$(ls "$DIR"/2026-04-*.md 2>/dev/null | sort -V)
+FILES=$(ls "$DIR"/lobster-diary/2026-04-*.md 2>/dev/null | sort -V)
 
 if [ -z "$FILES" ]; then
     echo "No diary files found"
