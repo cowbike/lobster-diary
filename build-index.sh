@@ -4,7 +4,7 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 OUT="$DIR/index.html"
 
 # Collect all diary files sorted by date
-FILES=$(ls "$DIR"/2026-04-*.md 2>/dev/null | sort -V)
+FILES=$(ls "$DIR"/*.md 2>/dev/null | grep -E '[0-9]{4}-[0-9]{2}-[0-9]{2}' | sort -V)
 
 if [ -z "$FILES" ]; then
     echo "No diary files found"
@@ -31,8 +31,9 @@ if md.startswith('---'):
 print(markdown.markdown(md, extensions=['nl2br', 'fenced_code']))
 " 2>/dev/null)
     
-    # Generate nav pill
-    NAV_HTML="${NAV_HTML}<a href=\"#day-$DATE\" class=\"pill\" data-date=\"$DATE\">${DATE#2026-0}</a>"
+    # Generate nav pill - extract MM-DD from YYYY-MM-DD
+    MONTH_DAY=$(echo "$DATE" | sed 's/^[0-9]*-0\?//')
+    NAV_HTML="${NAV_HTML}<a href=\"#day-$DATE\" class=\"pill\" data-date=\"$DATE\">${MONTH_DAY}</a>"
     
     # Generate content entry
     ENTRIES_HTML="${ENTRIES_HTML}
