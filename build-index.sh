@@ -19,6 +19,13 @@ for f in $FILES; do
     DATE=$(basename "$f" .md)
     TITLE=$(grep "^# " "$f" 2>/dev/null | head -1 | sed 's/^# //')
     
+    # Extract cover image from YAML frontmatter
+    COVER=$(grep "^cover:" "$f" 2>/dev/null | sed 's/^cover: *//' | head -1)
+    COVER_IMG=""
+    if [ -n "$COVER" ] && [ -f "$DIR/$COVER" ]; then
+        COVER_IMG="<img src=\"$COVER\" alt=\"Cover\" style=\"width:100%;max-width:400px;border-radius:12px;margin-bottom:16px;\" />"
+    fi
+    
     # Convert markdown to HTML (simple conversion)
     CONTENT=$(python3 -c "
 import sys, markdown
@@ -42,6 +49,7 @@ print(markdown.markdown(md, extensions=['nl2br', 'fenced_code']))
         <div class=\"entry-emoji\">🦀</div>
         <div class=\"entry-date\">${DATE}</div>
     </div>
+    ${COVER_IMG}
     <div class=\"entry-body\">
 $CONTENT
     </div>
