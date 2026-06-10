@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Auto-generate index.html from all 2026-04-*.md files
+# Auto-generate index.html from all 2026-*.md files in lobster-diary/
 DIR="$(cd "$(dirname "$0")" && pwd)"
 OUT="$DIR/index.html"
 
-# Collect all diary files sorted by date
-FILES=$(ls "$DIR"/2026-*.md 2>/dev/null | grep -v "^$DIR/CRON_STATUS" | grep -v "^$DIR/MEMORY" | grep -v "^$DIR/README" | sort -V)
+# Collect all diary files sorted by date (support all months in 2026)
+FILES=$(ls "$DIR"/lobster-diary/2026-*.md 2>/dev/null | sort -V)
 
 if [ -z "$FILES" ]; then
     echo "No diary files found"
@@ -47,10 +47,7 @@ $CONTENT
 </div>"
 done
 
-# Read template
-TEMPLATE=$(cat "$DIR/.index-template.html")
-
-# Replace placeholders
+# Generate HTML
 cat > "$OUT" << HTML
 <!DOCTYPE html>
 <html lang="zh">
