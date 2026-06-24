@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Auto-generate index.html from all 2026-04-*.md files
+# Auto-generate index.html from all 2026-*.md files in lobster-diary/
 DIR="$(cd "$(dirname "$0")" && pwd)"
 OUT="$DIR/index.html"
 
-# Collect all diary files sorted by date
-FILES=$(ls "$DIR"/*.md 2>/dev/null | grep -E '[0-9]{4}-[0-9]{2}-[0-9]{2}' | sort -V)
+# Collect all diary files sorted by date (support all months in 2026)
+FILES=$(ls "$DIR"/2026-*.md 2>/dev/null | sort -V)
 
 if [ -z "$FILES" ]; then
     echo "No diary files found"
@@ -19,13 +19,6 @@ for f in $FILES; do
     DATE=$(basename "$f" .md)
     TITLE=$(grep "^# " "$f" 2>/dev/null | head -1 | sed 's/^# //')
     
-    # Extract cover image from YAML frontmatter
-    COVER=$(grep "^cover:" "$f" 2>/dev/null | sed 's/^cover: *//' | head -1)
-    COVER_IMG=""
-    if [ -n "$COVER" ] && [ -f "$DIR/$COVER" ]; then
-        COVER_IMG="<img src=\"$COVER\" alt=\"Cover\" style=\"width:100%;max-width:400px;border-radius:12px;margin-bottom:16px;\" />"
-    fi
-    
     # Convert markdown to HTML (simple conversion)
     CONTENT=$(python3 -c "
 import sys, markdown
@@ -38,9 +31,8 @@ if md.startswith('---'):
 print(markdown.markdown(md, extensions=['nl2br', 'fenced_code']))
 " 2>/dev/null)
     
-    # Generate nav pill - extract MM-DD from YYYY-MM-DD
-    MONTH_DAY=$(echo "$DATE" | sed 's/^[0-9]*-0\?//')
-    NAV_HTML="${NAV_HTML}<a href=\"#day-$DATE\" class=\"pill\" data-date=\"$DATE\">${MONTH_DAY}</a>"
+    # Generate nav pill
+    NAV_HTML="${NAV_HTML}<a href=\"#day-$DATE\" class=\"pill\" data-date=\"$DATE\">${DATE#2026-0}</a>"
     
     # Generate content entry
     ENTRIES_HTML="${ENTRIES_HTML}
@@ -49,17 +41,13 @@ print(markdown.markdown(md, extensions=['nl2br', 'fenced_code']))
         <div class=\"entry-emoji\">🦀</div>
         <div class=\"entry-date\">${DATE}</div>
     </div>
-    ${COVER_IMG}
     <div class=\"entry-body\">
 $CONTENT
     </div>
 </div>"
 done
 
-# Read template
-TEMPLATE=$(cat "$DIR/.index-template.html")
-
-# Replace placeholders
+# Generate HTML
 cat > "$OUT" << HTML
 <!DOCTYPE html>
 <html lang="zh">
